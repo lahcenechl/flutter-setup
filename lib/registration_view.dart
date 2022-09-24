@@ -1,16 +1,18 @@
-import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
+
+import 'package:flutter/material.dart';
+
 import 'firebase_options.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+class RegisterView extends StatefulWidget {
+  const RegisterView({Key? key}) : super(key: key);
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<RegisterView> createState() => _RegisterViewState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _RegisterViewState extends State<RegisterView> {
   late final TextEditingController _email;
   late final TextEditingController _password;
 
@@ -21,6 +23,7 @@ class _HomePageState extends State<HomePage> {
     super.initState();
   }
 
+  @override
   void dispose() {
     _email.dispose();
     _password.dispose();
@@ -61,9 +64,19 @@ class _HomePageState extends State<HomePage> {
                       onPressed: () async {
                         final email = _email.text;
                         final password = _password.text;
-                        final UserCredential = await FirebaseAuth.instance
-                            .createUserWithEmailAndPassword(
-                                email: email, password: password);
+                        try {
+                          final UserCredential = await FirebaseAuth.instance
+                              .createUserWithEmailAndPassword(
+                                  email: email, password: password);
+                        } on FirebaseAuthException catch (e) {
+                          if (e.code == 'weak-password') {
+                            print('weak password');
+                          } else if (e.code == 'email-already-in-use') {
+                            print('email already in use');
+                          } else if (e.code == 'invalid-email') {
+                            print('invalid email');
+                          }
+                        }
                       },
                       child: const Text('Register'),
                     ),
